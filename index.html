@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#2a170c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Ölümlü Yatzy</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="ikonlar/ikon-192.png">
+  <link rel="apple-touch-icon" href="ikonlar/ikon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="sahne"></div>
+
+  <!-- Ana menü -->
+  <section id="menu">
+    <div class="kart">
+      <div class="baslikZar">🎲🔫</div>
+      <h1>Ölümlü Yatzy</h1>
+      <p class="alt">Kâğıdı en yüksek puanla dolduran tabancayı alır…</p>
+      <p id="onlineSayi" hidden></p>
+      <label>Adın <input id="adim" maxlength="12" placeholder="Adını yaz" autocomplete="off"></label>
+      <h3>Karakterini seç</h3>
+      <div id="karakterler"></div>
+      <p id="karakterAciklama" class="aciklama"></p>
+      <div class="menuDugmeleri">
+        <button id="giydirBtn" class="ikinciBtn">🎨 Karakterini giydir</button>
+        <button id="istatistikBtn" class="ikinciBtn">📊 İstatistik ve rozetler</button>
+      </div>
+      <details class="ayarlar" open>
+        <summary>⚙️ Oyun ayarları</summary>
+        <div class="kagitSecim">
+          <b>📋 Kâğıt uzunluğu</b>
+          <label><input type="radio" name="kagit" value="kisa"> <b>Kısa</b> <small>6 kutu: Çift, Üçlü, Full House, Küçük/Büyük Kent, Yatzy</small></label>
+          <label><input type="radio" name="kagit" value="orta"> <b>Orta</b> <small>9 kutu: alt bölüm (Çift, İki Çift, Üçlü, Dörtlü, Kentler, Full House, Şans, Yatzy)</small></label>
+          <label><input type="radio" name="kagit" value="uzun"> <b>Uzun</b> <small>15 kutu: tam Yatzy kâğıdı (Birler…Altılar dahil)</small></label>
+        </div>
+        <label class="ozelSecim"><input type="checkbox" id="bonusAcik"><span class="emoji">🎁</span><b>Üst bölüm bonusu</b><small>Uzun kâğıtta Birler…Altılar toplamı 63 ve üstüyse +35 puan.</small></label>
+        <p id="ayarNotu" class="not"></p>
+      </details>
+      <button id="botlaBtn" class="buyuk">🤖 Botlarla oyna</button>
+      <div class="online">
+        <h3>👥 Arkadaşlarla oyna</h3>
+        <button id="odaKurBtn" class="buyuk ikinciBtn">🏠 Oda kur</button>
+        <div class="katilSatiri">
+          <input id="odaKoduGir" maxlength="5" placeholder="Oda kodu" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <button id="katilBtn">Katıl</button>
+        </div>
+        <button id="geriDonBtn" class="ikinciBtn" hidden></button>
+        <div id="onlineDurum"></div>
+        <button id="baslatBtn" class="buyuk" hidden>▶️ Oyunu başlat</button>
+        <button id="odaIptalBtn" class="ikinciBtn" hidden>❌ Odayı kapat</button>
+        <p class="not">2-4 kişi. Boş koltuklarda bot oynar. Oyundan düşenin yerine bot geçer; aynı adla geri girince kaldığı yerden devam eder. 🎤 ile sesli konuşabilirsiniz.</p>
+      </div>
+      <details>
+        <summary>Nasıl oynanır?</summary>
+        <ul>
+          <li>Her atışta herkes <b>aynı anda</b> 5 zar atar. İstediğin zarlara dokunup <b>1 kez</b> yeniden atabilirsin.</li>
+          <li>Sonra kâğıdında boş bir kutu seçersin; kutuda o zarlarla kaç puan alacağın yazar. Uymuyorsa 0 yazılır.</li>
+          <li>Puanlar: Birler…Altılar o sayının toplamı · Çift, İki Çift, Üçlü, Dörtlü, Full House, Şans zarların toplamı · Küçük Kent (1-5) 15 · Büyük Kent (2-6) 20 · <b>YATZY 50</b>.</li>
+          <li>Kâğıtlar dolunca <b>en yüksek puanlı</b> tabancayı alır (eşitlikte zar atılır) ve bir rakibine doğrultur.</li>
+          <li>Tabancada 1 mermi var: 4 kişide 6, 3 kişide 4, 2 kişide 2 hazne. Patlarsa hedefin mumu söner; patlamazsa yeni kâğıtla devam.</li>
+          <li>En son hayatta kalan kazanır.</li>
+        </ul>
+      </details>
+      <p class="not">Bilgisayarda fareyi oynatınca, telefonda ekranı sürükleyince kafanı çevirirsin. 👀</p>
+    </div>
+  </section>
+
+  <!-- Oyun ekranı -->
+  <section id="oyun" hidden>
+    <header id="ust">
+      <button id="menuBtn" title="Ana menü">☰</button>
+      <div id="sonIddia"></div>
+      <div class="sagDugmeler">
+        <span id="odaBilgisi" title="Oda kodu" hidden></span>
+        <button id="sohbetBtn" title="Sohbet" hidden>💬<span id="okunmamis" hidden></span></button>
+        <button id="sesliBtn" title="Sesli sohbete katıl" hidden>🎤</button>
+        <button id="kagitlarBtn" title="Herkesin kâğıdı">📋</button>
+        <button id="muzikBtn" title="Müzik">🎵</button>
+        <button id="sesBtn" title="Ses">🔊</button>
+      </div>
+    </header>
+    <div id="etiketler"></div>
+    <div id="mesaj"></div>
+    <div id="acilan" hidden></div>
+    <div id="alt">
+      <div id="benimBilgi"></div>
+      <div id="sureCubugu"><div></div></div>
+      <div id="zarlarim"></div>
+      <button id="yenidenAtBtn" hidden>🎲 Yeniden at</button>
+      <div id="kagidim"></div>
+      <div id="tepkiler"><button>😂</button><button>😡</button><button>😱</button><button>🤥</button><button>🤠</button></div>
+    </div>
+    <div id="hedefPaneli" hidden></div>
+    <div id="domatesCubugu" hidden></div>
+    <canvas id="domatesKanvas"></canvas>
+    <div id="olumPerdesi" hidden>
+      <h2>🕯️ Mumun söndü…</h2>
+      <p>Kurşun sana geldi. Oyunu izlemeye devam edebilirsin; yukarıdan yaşayanlara 🍅 domates atabilirsin!</p>
+      <button id="olumMenuBtn" class="ikinciBtn">🏠 Ana menü</button>
+    </div>
+    <div id="sonEkran" hidden>
+      <div class="kart">
+        <h2 id="sonBaslik"></h2>
+        <p id="sonYazi"></p>
+        <div id="oduller"></div>
+        <div id="yeniRozet"></div>
+        <button id="tekrarBtn" class="buyuk">🔁 Tekrar oyna</button>
+        <p id="sonBekle" class="not" hidden>⏳ Oda sahibi yeni oyunu başlatınca masaya otomatik döneceksin.</p>
+        <button id="sonMenuBtn" class="ikinciBtn">🏠 Ana menü</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Herkesin puan kâğıdı -->
+  <section id="kagitlarPaneli" class="perde" hidden>
+    <div class="kart">
+      <h2>📋 Puan kâğıtları</h2>
+      <div class="tabloKap"><table id="kagitlarTablo"></table></div>
+      <button id="kagitlarKapat" class="ikinciBtn">Kapat</button>
+    </div>
+  </section>
+
+  <!-- Karakter giydirme -->
+  <section id="giydirPaneli" class="perde" hidden>
+    <div class="kart">
+      <h2 id="giydirBaslik">🎨 Giydir</h2>
+      <div id="giydirOnizleme"></div>
+      <div id="giydirSecenekler"></div>
+      <button id="giydirSifirla" class="ikinciBtn">↩️ Varsayılan kıyafet</button>
+      <button id="giydirKapat" class="buyuk">✅ Tamam</button>
+    </div>
+  </section>
+
+  <!-- İstatistik ve rozetler -->
+  <section id="istatistikPaneli" class="perde" hidden>
+    <div class="kart">
+      <h2>📊 İstatistiklerin</h2>
+      <div id="istatistikIcerik"></div>
+      <button id="istatistikKapat" class="ikinciBtn">Kapat</button>
+    </div>
+  </section>
+
+  <!-- Oda sohbeti -->
+  <section id="sohbetPaneli" class="perde" hidden>
+    <div class="kart">
+      <h2>💬 Sohbet</h2>
+      <div id="sohbetListe"></div>
+      <div id="hizliMesaj"><button>Yalancı! 🤥</button><button>Bana güven 🤠</button><button>Eyvah 😱</button><button>😂</button><button>Hadi!</button></div>
+      <form id="sohbetForm"><input id="sohbetYazi" maxlength="120" placeholder="Mesaj yaz..." autocomplete="off"><button>Gönder</button></form>
+      <button id="sohbetKapat" class="ikinciBtn">Kapat</button>
+    </div>
+  </section>
+
+  <!-- Misafir: oda sahibiyle bağlantı koptu -->
+  <section id="baglantiEkrani" class="perde" hidden>
+    <div class="kart">
+      <h2>📡 Bağlantı koptu</h2>
+      <p>Oda sahibiyle bağlantın kesildi. İnternetin geldiyse yeniden bağlan; bu arada yerine bot oynuyor, kaldığın yerden devam edersin.</p>
+      <button id="yenidenBaglanBtn" class="buyuk">🔁 Yeniden bağlan</button>
+      <button id="baglantiCikBtn" class="ikinciBtn">🏠 Ana menü</button>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
+  <script src="ses.js"></script>
+  <script src="motor.js"></script>
+  <script src="karakterler.js"></script>
+  <script src="sahne.js"></script>
+  <script src="oyun.js"></script>
+  <script src="giydir.js"></script>
+  <script src="istatistik.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="ag.js"></script>
+  <script src="sayac.js"></script>
+  <script>
+    if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js');
+  </script>
+</body>
+</html>

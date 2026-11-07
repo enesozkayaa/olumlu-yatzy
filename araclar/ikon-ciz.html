@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--
+  Ölümlü Yatzy - uygulama simgesini çizer: koyu ahşap zemin, kovboy şapkalı yanan mum.
+  Adres sonuna ?boyut=512&pay=0.08 yazılır (pay: kenar boşluğu; "maskable" simgede daha büyük).
+  PNG'ye çevirmek için Edge görünmez modda ekran görüntüsü alır:
+    msedge --headless --hide-scrollbars --window-size=512,512 --screenshot=ikonlar/ikon-512.png "file:///.../araclar/ikon-ciz.html?boyut=512&pay=0.08"
+-->
+<html>
+<head>
+<meta charset="UTF-8">
+<style>html, body { margin: 0; background: #2a170c; overflow: hidden; } canvas { display: block; }</style>
+</head>
+<body>
+<script>
+  const ayar = new URLSearchParams(location.search);
+  const boyut = +(ayar.get('boyut') || 512);
+  const pay = +(ayar.get('pay') || 0.08);
+  const c = document.createElement('canvas');
+  c.width = c.height = boyut;
+  document.body.appendChild(c);
+  const g = c.getContext('2d');
+  g.scale(boyut / 512, boyut / 512);
+
+  // Arka plan: mum ışığıyla aydınlanan koyu ahşap
+  const arka = g.createRadialGradient(256, 210, 20, 256, 256, 400);
+  arka.addColorStop(0, '#a8642a');
+  arka.addColorStop(0.45, '#5a3016');
+  arka.addColorStop(1, '#1e0f06');
+  g.fillStyle = arka;
+  g.fillRect(0, 0, 512, 512);
+  g.strokeStyle = 'rgba(20,8,0,.35)';
+  g.lineWidth = 3;
+  for (let x = 64; x < 512; x += 64) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 512); g.stroke(); }
+
+  g.save();
+  const k = 1 - pay;
+  g.translate(256, 256);
+  g.scale(k, k);
+  g.translate(-256, -256);
+
+  // Işık halesi
+  const hale = g.createRadialGradient(256, 230, 10, 256, 230, 230);
+  hale.addColorStop(0, 'rgba(255,200,90,.7)');
+  hale.addColorStop(1, 'rgba(255,160,40,0)');
+  g.fillStyle = hale;
+  g.fillRect(0, 0, 512, 512);
+
+  // Deri zar bardağı (yana yatmış, ağzından zarlar dökülüyor)
+  g.save();
+  g.translate(170, 250);
+  g.rotate(-0.5);
+  const deri = g.createLinearGradient(-90, 0, 90, 0);
+  deri.addColorStop(0, '#4a2410'); deri.addColorStop(0.5, '#8a4e22'); deri.addColorStop(1, '#4a2410');
+  g.fillStyle = deri;
+  g.beginPath(); g.moveTo(-70, -120); g.lineTo(70, -120); g.lineTo(90, 110); g.lineTo(-90, 110); g.closePath(); g.fill();
+  g.fillStyle = '#c9a25a'; g.fillRect(-80, -10, 160, 16);
+  g.fillStyle = '#2a1408'; g.beginPath(); g.ellipse(0, 110, 90, 24, 0, 0, 7); g.fill();
+  g.restore();
+
+  // Zarlar
+  function zar(x, y, aci, n, boy) {
+    g.save(); g.translate(x, y); g.rotate(aci);
+    g.shadowColor = '#0008'; g.shadowBlur = 18; g.shadowOffsetY = 8;
+    g.fillStyle = '#f4ecd8'; g.beginPath(); g.roundRect(-boy / 2, -boy / 2, boy, boy, boy * 0.18); g.fill();
+    g.shadowColor = 'transparent';
+    const d = { 3: [[1, 1], [2, 2], [3, 3]], 5: [[1, 1], [1, 3], [2, 2], [3, 1], [3, 3]], 1: [[2, 2]] }[n];
+    g.fillStyle = n === 1 ? '#b3261e' : '#1a1a1a';
+    d.forEach(([px, py]) => { g.beginPath(); g.arc(-boy / 2 + (px * boy) / 4, -boy / 2 + (py * boy) / 4, boy * (n === 1 ? 0.14 : 0.1), 0, 7); g.fill(); });
+    g.restore();
+  }
+  zar(300, 330, 0.25, 5, 120);
+  zar(400, 400, -0.3, 1, 100);
+  zar(270, 440, 0.6, 3, 90);
+
+  // Altıpatlar (zarların üstünde)
+  g.save();
+  g.translate(360, 170);
+  g.rotate(-0.35);
+  g.shadowColor = '#000a'; g.shadowBlur = 20; g.shadowOffsetY = 8;
+  g.fillStyle = '#5a5e66';
+  g.fillRect(-20, -18, 150, 26);            // namlu
+  g.fillStyle = '#6e737c';
+  g.beginPath(); g.ellipse(-30, -4, 40, 30, 0, 0, 7); g.fill();   // top
+  g.fillStyle = '#3a3d44';
+  for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(-42 + i * 12, -4 + (i % 2) * 8, 6, 0, 7); g.fill(); }
+  g.fillStyle = '#6b3a1a';
+  g.beginPath(); g.moveTo(-60, 10); g.lineTo(-30, 18); g.lineTo(-50, 110); g.lineTo(-95, 100); g.closePath(); g.fill();  // kabza
+  g.strokeStyle = '#5a5e66'; g.lineWidth = 6;
+  g.beginPath(); g.arc(-15, 30, 18, 0, Math.PI); g.stroke();    // tetik korkuluğu
+  g.restore();
+  g.restore();
+</script>
+</body>
+</html>
