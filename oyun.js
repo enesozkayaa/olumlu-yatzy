@@ -19,7 +19,7 @@ const ui = {
   etiketler: {},
   bakisSayac: { no: -1, sure: 0 },
   ozelBakis: {},
-  secili: new Set(),        // yeniden atılacak zarlarım
+  secili: new Set(),        // TUTTUĞUM zarlar (yeniden atışta bunlar kalır, diğerleri atılır)
   zarGizli: false,
 };
 const online = () => typeof Ag !== 'undefined' && Ag.mod !== 'yerel';
@@ -490,8 +490,12 @@ function zarlarimCiz(yeni) {
   const secebilir = !ben.secti && !ben.yenidenAtti;
   kap.innerHTML = ben.zarlar.map((z, i) => `<button class="zarKutu${yeni ? ' yeni' : ''}${ui.secili.has(i) ? ' secili' : ''}" data-i="${i}" ${secebilir ? '' : 'disabled'} style="animation-delay:${i * 0.06}s">${zarImg(z)}</button>`).join('');
   $('yenidenAtBtn').hidden = ben.secti;
-  $('yenidenAtBtn').disabled = !secebilir || !ui.secili.size;
-  $('yenidenAtBtn').textContent = ben.yenidenAtti ? '🎲 Yeniden atma hakkını kullandın' : ui.secili.size ? `🎲 ${ui.secili.size} zarı yeniden at (1 hak)` : '🎲 Yeniden atmak için zarlara dokun';
+  const atilacak = 5 - ui.secili.size;
+  $('yenidenAtBtn').disabled = !secebilir || !atilacak;
+  $('yenidenAtBtn').textContent = ben.yenidenAtti ? '🎲 Yeniden atma hakkını kullandın'
+    : !atilacak ? '✋ Hepsini tuttun: kutunu seç'
+    : ui.secili.size ? `🎲 Tuttuğun ${ui.secili.size} zar kalsın, diğer ${atilacak} zarı at (1 hak)`
+    : '🎲 5 zarın hepsini yeniden at (1 hak) · tutmak istediklerine dokun';
 }
 $('zarlarim').addEventListener('click', e => {
   const b = e.target.closest('button[data-i]');
@@ -503,8 +507,10 @@ $('zarlarim').addEventListener('click', e => {
   zarlarimCiz();
 });
 $('yenidenAtBtn').addEventListener('click', () => {
-  if (!ui.secili.size) return;
-  Masa.yenidenAt(ui.benimNo, [...ui.secili]);
+  // Tuttuklarım kalır, tutmadıklarım atılır
+  const atilacak = [0, 1, 2, 3, 4].filter(i => !ui.secili.has(i));
+  if (!atilacak.length) return;
+  Masa.yenidenAt(ui.benimNo, atilacak);
 });
 
 // Puan kâğıdım: boş kutularda bu zarlarla kaç puan alacağım yazar, dokununca seçilir

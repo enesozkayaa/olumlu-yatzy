@@ -450,3 +450,9 @@ button:disabled { opacity: .55; cursor: default; }
   #kagidim .ipucu { font-size: 8.5px; }
   #kagidim { max-height: 33vh; }
 }
+/* Tutulan zar: yukarı kalkık, yeşil çerçeve ve "TUT" yazısı */
+#zarlarim button.zarKutu { position: relative; }
+#zarlarim button.zarKutu.secili::after {
+  content: 'TUT'; position: absolute; left: 50%; top: -15px; transform: translateX(-50%);
+  font-size: 10px; font-weight: 900; color: #1a3a10; background: #7dff6a; border-radius: 6px; padding: 0 5px;
+}
