@@ -508,6 +508,33 @@ $('yenidenAtBtn').addEventListener('click', () => {
 });
 
 // Puan kâğıdım: boş kutularda bu zarlarla kaç puan alacağım yazar, dokununca seçilir
+// Her kutu ne ister (oyunu bilmeyenler için kısa açıklama)
+const KUTU_IPUCU = {
+  birler: "1'lerin toplamı", ikiler: "2'lerin toplamı", ucler: "3'lerin toplamı", dortler: "4'lerin toplamı", besler: "5'lerin toplamı", altilar: "6'ların toplamı",
+  cift: '2 aynı zar', ikiCift: '2 ayrı çift', uclu: '3 aynı zar', dortlu: '4 aynı zar', kucukKent: '1-2-3-4-5 sıralı = 15', buyukKent: '2-3-4-5-6 sıralı = 20',
+  full: '3 aynı + 2 aynı', sans: '5 zarın toplamı', yatzy: '5 zar aynı = 50',
+};
+// Bu kutunun puanına hangi zarlar sayılıyor (sarı çerçeveyle gösterilir)
+function sayilanZarlar(kutu, z) {
+  if (!Motor.puan(kutu, z)) return [];
+  const ust = Motor.KUTULAR[kutu]?.ust;
+  const hepsi = [0, 1, 2, 3, 4];
+  if (ust) return hepsi.filter(i => z[i] === ust);
+  const say = [0, 0, 0, 0, 0, 0, 0];
+  z.forEach(d => say[d]++);
+  const sec = (deger, adet) => hepsi.filter(i => z[i] === deger).slice(0, adet);
+  const enBuyuk = n => [6, 5, 4, 3, 2, 1].find(v => say[v] >= n);
+  if (kutu === 'cift') return sec(enBuyuk(2), 2);
+  if (kutu === 'uclu') return sec(enBuyuk(3), 3);
+  if (kutu === 'dortlu') return sec(enBuyuk(4), 4);
+  if (kutu === 'ikiCift') {
+    const [a, b] = [6, 5, 4, 3, 2, 1].filter(v => say[v] >= 2);
+    return [...sec(a, 2), ...sec(b, 2)];
+  }
+  return hepsi;   // kentler, full house, şans, yatzy: beş zar da sayılır
+}
+const miniZarlar = (z, sayilan) => `<div class="miniZarlar">${z.map((d, i) => `<img src="${zarResmi(d)}" class="${sayilan.includes(i) ? 'sayilir' : 'sayilmaz'}" alt="${d}">`).join('')}</div>`;
+
 function kagidimCiz(karar) {
   const d = ui.durum, ben = d?.oyuncular[ui.benimNo];
   const kap = $('kagidim');
@@ -519,10 +546,22 @@ function kagidimCiz(karar) {
     const dolu = ben.kagit[k] !== null && ben.kagit[k] !== undefined;
     const olasi = !dolu && karar ? Motor.puan(k, ben.zarlar) : null;
     const sinif = dolu ? 'dolu' : karar ? (olasi ? 'olasi' : 'sifir') : 'bos';
-    return `<button class="kutu ${sinif}${ben.secti === k ? ' yeniSecildi' : ''}" data-kutu="${k}" ${dolu || !karar ? 'disabled' : ''}>`
-      + `<span>${kutuAdi(k)}</span><b>${dolu ? ben.kagit[k] : olasi !== null ? olasi : '–'}</b></button>`;
-  }).join('') + `<div class="kutu toplamKutu"><span>Toplam</span><b>${ben.toplam}</b></div>`;
+    // Boş kutularda: neyi istediği ve puanı hangi zarların getirdiği (sarı çerçeveli olanlar sayılır)
+    const aciklama = !dolu && karar ? `<small class="ipucu">${KUTU_IPUCU[k]}</small>${miniZarlar(ben.zarlar, sayilanZarlar(k, ben.zarlar))}` : '';
+    return `<button class="kutu ${sinif}${ben.secti === k ? ' yeniSecildi' : ''}" data-kutu="${k}" ${dolu || !karar ? 'disabled' : ''} title="${KUTU_IPUCU[k]}">`
+      + `<div class="ust"><span>${kutuAdi(k)}</span><b>${dolu ? ben.kagit[k] : olasi !== null ? olasi : '–'}</b></div>${aciklama}</button>`;
+  }).join('') + `<div class="kutu toplamKutu"><div class="ust"><span>Toplam</span><b>${ben.toplam}</b></div></div>`;
+  $('kagitIpucu').hidden = !karar;
 }
+// Fareyle bir kutunun üstüne gelince büyük zarlarda da sayılanlar sarı çerçeveyle gösterilir
+$('kagidim').addEventListener('pointerover', e => {
+  const b = e.target.closest('button[data-kutu]');
+  const ben = ui.durum?.oyuncular[ui.benimNo];
+  if (!ben?.zarlar) return;
+  const sayilan = b && !b.disabled ? sayilanZarlar(b.dataset.kutu, ben.zarlar) : [];
+  document.querySelectorAll('#zarlarim .zarKutu').forEach((z, i) => z.classList.toggle('sayilir', sayilan.includes(i)));
+});
+$('kagidim').addEventListener('pointerleave', () => document.querySelectorAll('#zarlarim .zarKutu').forEach(z => z.classList.remove('sayilir')));
 $('kagidim').addEventListener('click', e => {
   const b = e.target.closest('button[data-kutu]');
   if (!b || b.disabled) return;

@@ -432,3 +432,21 @@ button:disabled { opacity: .55; cursor: default; }
   #kagidim { grid-template-columns: repeat(3, 1fr); max-height: 26vh; }
   #kagidim .kutu { font-size: 11px; padding: 4px 5px; }
 }
+
+/* Kutularda puanın sebebi: hangi zarlar sayılıyor */
+#kagidim .kutu { flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 2px; }
+#kagidim .kutu .ust { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
+#kagidim .ipucu { font-size: 9.5px; opacity: .7; text-align: left; line-height: 1.1; }
+.miniZarlar { display: flex; gap: 2px; justify-content: center; }
+.miniZarlar img { width: 16px; height: 16px; border-radius: 3px; }
+.miniZarlar img.sayilir { outline: 2px solid #ffd23a; outline-offset: 0; box-shadow: 0 0 5px #ffd23a; }
+.miniZarlar img.sayilmaz { opacity: .3; filter: grayscale(1); }
+#zarlarim .zarKutu.sayilir { box-shadow: 0 0 0 3px #ffd23a, 0 0 14px #ffd23a; }
+#kagitIpucu { margin: 0; font-size: 11.5px; opacity: .85; text-align: center; }
+#kagitIpucu .sari { color: #ffd23a; font-weight: 800; }
+#kagidim { max-height: 36vh; }
+@media (max-width: 600px) {
+  .miniZarlar img { width: 13px; height: 13px; }
+  #kagidim .ipucu { font-size: 8.5px; }
+  #kagidim { max-height: 33vh; }
+}
