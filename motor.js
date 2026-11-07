@@ -40,7 +40,13 @@ const Motor = (() => {
   const rastgele = n => Math.floor(Math.random() * n);
   const zarAt = () => 1 + rastgele(6);
   const canlilar = () => o.oyuncular.filter(p => p.canli);
-  const olay = (tip, veri = {}) => dinleyici(tip, veri);
+  const olay = (tip, veri = {}) => {
+    try {
+      dinleyici(tip, veri);
+    } catch (e) {
+      console.error('Olay işlenirken hata:', tip, e);   // ekran hatası oyunu durdurmasın
+    }
+  };
 
   // ---------- Puan hesabı ----------
   function puan(kutu, z) {
