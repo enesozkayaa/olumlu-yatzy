@@ -450,3 +450,7 @@ button:disabled { opacity: .55; cursor: default; }
   #kagidim .ipucu { font-size: 8.5px; }
   #kagidim { max-height: 33vh; }
 }
+
+/* iPhone: yazı kutusuna dokununca ekran büyümesin (16px altı yazılar büyütme yapar), çift dokunuşla büyütme olmasın */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
+input, select, textarea { font-size: max(16px, 1em); }
